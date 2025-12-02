@@ -1,0 +1,24 @@
+[package]
+name = "ohttp-gateway"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.7"
+bhttp = "0.7.1"
+bytes = "1"
+futures = "0.3"
+http = "1"
+ohttp = { version = "0.7.1", default-features = false, features = ["server", "rust-hpke", "stream"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"] }
+thiserror = "1"
+tokio = { version = "1", features = ["full"] }
+clap = { version = "4", features = ["derive"] }
+env_logger = "0.11"
+log = "0.4"
+tokio-util = { version = "0.7", features = ["io", "compat", "net"] }
+hex = "0.4"
+
+[patch.crates-io]
+ohttp = { path = "vendor/ohttp" }
+hpke = { path = "vendor/hpke" }

@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  push:
+    branches: [ '**' ]
+    paths-ignore: ["README.md"]
+  pull_request:
+    branches: [ '**' ]
+    paths-ignore: ["README.md"]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        platform:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        toolchain:
+          - stable
+          - beta
+          - nightly
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v1
+
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+
+      - name: Run cargo test with just X25519 enabled
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: -D warnings -A dead_code -A unused_imports
+        run: cargo test --no-default-features --features="x25519"
+
+      - name: Run cargo test with just P256 enabled
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: -D warnings -A dead_code -A unused_imports
+        run: cargo test --no-default-features --features="p256"
+
+      - name: Run cargo test with just P384 enabled
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: -D warnings -A dead_code -A unused_imports
+        run: cargo test --no-default-features --features="p384"
+
+      - name: Run cargo test with just P521 enabled
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: -D warnings -A dead_code -A unused_imports
+        run: cargo test --no-default-features --features="p521"
+
+      - name: Run cargo test with all features enabled
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: -D warnings -A dead_code -A unused_imports
+        run: cargo test --all-features
+
+      - name: Run cargo build with all features
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: -D warnings
+        run: cargo build --all-features
+  rustfmt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v1
+
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          components: rustfmt
+
+      - name: Run cargo fmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+  # Enable this once x25519-dalek has another 2.0-pre.X release
+  #msrv:
+  #  name: Current MSRV is 1.65.0
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #  - uses: actions/checkout@v3
+  #  # First run `cargo +nightly -Z minimal-verisons check` in order to get a
+  #  # Cargo.lock with the oldest possible deps
+  #  - uses: dtolnay/rust-toolchain@nightly
+  #  - run: cargo -Z minimal-versions check --all-features
+  #  # Now check that `cargo build` works with respect to the oldest possible
+  #  # deps and the stated MSRV
+  #  - uses: dtolnay/rust-toolchain@1.65.0
+  #  - run: cargo build --all-features
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          components: clippy
+      - run: cargo clippy --all-features -- -D warnings
