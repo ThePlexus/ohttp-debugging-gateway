@@ -2,6 +2,8 @@
 
 A minimal Oblivious HTTP gateway for debugging relay and client implementations to ensure compatiblity with OHTTP gateway services such as Cloudflare Privacy Gateway. It implements RFC 9458 plus the chunked OHTTP draft by leveraging the `ohttp` and `bhttp` crates. It has absolutely no security, no TLS support, no privacypass support and no unsafe {} scapegoats to blame when it explodes, so dont use this anywhere except localhost
 
+You will probabyl find the most utility from debugging HPKE issues or OHTTP Chunking issues
+
 ### Running
 
 ```bash
